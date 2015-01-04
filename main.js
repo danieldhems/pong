@@ -2,9 +2,6 @@ var Pong = function(){
 
 	var self = this;
 
-	this.directionX = "right";
-	this.directionY = undefined;
-
 	this.controls = {
 		start: 32, // spacebar
 		player1: {
@@ -22,28 +19,32 @@ var Pong = function(){
 		player2: 0
 	};
 
-	this.player1PointsDisplay = document.querySelector("#player1");
-	this.player2PointsDisplay = document.querySelector("#player2");
-
 	this.player1Paddle;
 	this.player2Paddle;
 
 	this.config = {
-		paddleHeight: 50
+		paddleHeight: undefined,
+		scoreToWin: 5,
+		ballSpeed: 5,
+		infoDisplay: {	
+			player1: document.querySelector("#player1-info"),
+			player2: document.querySelector("#player2-info")
+		},
+		pointsDisplay: {
+			player1: document.querySelector("#player1-points"),
+			player2: document.querySelector("#player2-points")		
+		},
+		startPlayMessage: "Press space to play",
+		winMessage: "Win"
 	};
 
 	this.keyDown = false;
 
-	this.getUnitlessNum = function(value){
-		return parseInt(value.replace(/[a-zA-Z]/g, ''));
-	}
-
 	this.gameWon = false;
 
-	this.ballYVector = 3;
-
-	this.player1KeyIsDown = false,
-	this.player1KeyIsUp = true;
+	this.directionX = "right";
+	this.directionY = undefined; // which direction the ball is moving on the Y axis - "up" or "down"
+	this.ballYVector = 3; // how many pixels the ball should move up or down on each tick for diagonal movement
 
 	this.bindControls = function(){
 
@@ -59,7 +60,6 @@ var Pong = function(){
 				if(self.gameWon) {
 					// if the game has been won, reset game state
 					self.resetGame();
-					self.tick();
 				} else {
 					// run game if it isn't already
 					if(!self.gameRunning) self.tick();
@@ -67,7 +67,6 @@ var Pong = function(){
 			}
 		});
 	}	
-
 
 	this.makeBall = function (width, height){
 		this.ball = document.createElement("div");
@@ -83,6 +82,9 @@ var Pong = function(){
 	}
 
 	this.makePaddles = function (width, size){
+		// set global paddleheight for use in collision detection
+		self.config.paddleHeight = size;
+
 		this.player1Paddle = document.createElement("div"),
 		this.player2Paddle = document.createElement("div");
 
@@ -104,22 +106,27 @@ var Pong = function(){
 
 	}
 
+	this.showMessage = function(msg, player){
+		self.config.infoDisplay[player].innerHTML = msg;
+	}
+
+	this.clearMessages = function(){
+		self.config.infoDisplay.player1.innerHTML = "";
+		self.config.infoDisplay.player2.innerHTML = "";
+	}
+
 	this.addPoint = function(player){
 		self.points[player] += 1;
-		if(player === "player1"){
-			self.player1PointsDisplay.innerHTML = self.points[player];
-		} else if(player === "player2") {
-			self.player2PointsDisplay.innerHTML = self.points[player];
-		}
+		self.config.pointsDisplay[player].innerHTML = self.points[player];
 
-		if(self.points[player] == 1 ) self.finishGame(player);
+		if(self.points[player] == self.config.scoreToWin ) self.finishGame(player);
+
+		self.showMessage(self.config.startPlayMessage, player == "player1" ? "player2" : "player1");
 	}
 
 	this.finishGame = function(player){
 		self.gameWon = true;
-
-		var winBanner = document.querySelector("#win-"+player);
-		winBanner.className += " reveal";
+		self.showMessage(self.config.winMessage, player);
 	}
 
 	this.resetGame = function(){
@@ -129,18 +136,20 @@ var Pong = function(){
 		self.directionY = undefined;
 		self.gameWon = false;
 
-		var winDisplays = document.querySelectorAll(".win-display");
-		for(var i=0, l=winDisplays.length; i<l; i++){
-			winDisplays[i].className = winDisplays[i].className.replace("reveal","");
-		}
+		self.config.pointsDisplay["player1"].innerHTML = "0";
+		self.config.pointsDisplay["player2"].innerHTML = "0";
+		self.config.infoDisplay["player1"].innerHTML = "";
+		self.config.infoDisplay["player2"].innerHTML = "";
+
+		self.tick();
 	}
 
 	this.tick = function (speed){
 		var tick = setInterval( function(){
 
 			self.gameRunning = true;
-
 			self.ball.style.display = "block";
+			self.clearMessages();
 
 			if(self.keyDown){
 
@@ -153,7 +162,7 @@ var Pong = function(){
 						var paddleTop = paddle.offsetTop,
 							paddleBottom =  paddleTop + self.config.paddleHeight;
 
-						if( paddleTop - 1 > 0){
+						if( paddleTop - 3 >= 0){
 							self.player1Paddle.style.top = paddleTop - 3 + "px";
 						}
 
@@ -164,7 +173,7 @@ var Pong = function(){
 							paddleTop = paddle.offsetTop,
 							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
 
-						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+						if( paddleBottom + 3 <= self.getBoundingBox(window).y){
 							self.player1Paddle.style.top = paddleTop + 3 + "px";
 						}
 					break;
@@ -174,7 +183,7 @@ var Pong = function(){
 							paddleTop = paddle.offsetTop,
 							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
 
-						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+						if( paddleTop - 3 >= 0){
 							self.player2Paddle.style.top = paddleTop - 3 + "px";
 						}
 					break;
@@ -184,7 +193,7 @@ var Pong = function(){
 							paddleTop = paddle.offsetTop,
 							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
 
-						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+						if( paddleBottom + 3 <= self.getBoundingBox(window).y){
 							self.player2Paddle.style.top = paddleTop + 3 + "px";
 						}
 					break;	
@@ -209,10 +218,10 @@ var Pong = function(){
 
 			// horizontal movement
 			if(self.directionX == "right"){
-				self.ball.style.left = currentX + 3 + "px";
+				self.ball.style.left = currentX + self.config.ballSpeed + "px";
 				//self.ball.style.top = currentY - (25/90) + "px";
 			} else if(self.directionX == "left") {
-				self.ball.style.left = currentX - 3 + "px";
+				self.ball.style.left = currentX - self.config.ballSpeed + "px";
 			}
 
 			// vertical movement
@@ -352,6 +361,8 @@ var Pong = function(){
 		this.makeBall(20, 20);
 		this.makePaddles(5,100);
 		this.bindControls();
+
+		self.config.infoDisplay["player1"].innerHTML = self.config.startPlayMessage;
 	}
 
 	this.init();

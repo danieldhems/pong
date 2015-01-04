@@ -12,22 +12,18 @@
 		text-align:center;
 	}
 
-	.win-display {
+	.info-display {
 		width:25%;
 		height:25%;
 		position:absolute;
 		top:50%;
 		font-size:4em;
-		display:none;
-	}
-	.win-display.reveal {
-		display:block;
 	}
 
-	#win-player1 {
+	#player1-info {
 		left:25%;
 	}
-	#win-player2 {		
+	#player2-info {		
 		right:0;
 	}
 
@@ -54,11 +50,11 @@
 </head>
 <body>
 	<div id="scores">
-		<span id="player1">0</span>
-		<span id="player2">0</span>
+		<span id="player1-points">0</span>
+		<span id="player2-points">0</span>
 	</div>
-	<div id="win-player1" class="win-display">Win</div>
-	<div id="win-player2" class="win-display">Win</div>
+	<div id="player1-info" class="info-display"></div>
+	<div id="player2-info" class="info-display"></div>
 	<script type="text/javascript" src="main.js"></script>
 </body>
 </html>
