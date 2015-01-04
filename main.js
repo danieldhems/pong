@@ -22,7 +22,8 @@ var Pong = function(){
 		player2: 0
 	};
 
-	this.playerPoint; // Player to be awarded next point on miss (use in conjunction with ball direction)
+	this.player1PointsDisplay = document.querySelector("#player1");
+	this.player2PointsDisplay = document.querySelector("#player2");
 
 	this.player1Paddle;
 	this.player2Paddle;
@@ -33,16 +34,11 @@ var Pong = function(){
 
 	this.keyDown = false;
 
-	this.tween - function(){
-		var steps = [10,10,10,10,9,8,7,6,5],
-			frames = 20;
-
-		this.startAnimation = function(){}
-	}
-
 	this.getUnitlessNum = function(value){
 		return parseInt(value.replace(/[a-zA-Z]/g, ''));
 	}
+
+	this.gameWon = false;
 
 	this.ballYVector = 3;
 
@@ -51,75 +47,25 @@ var Pong = function(){
 
 	this.bindControls = function(){
 
-		var paddleMove = undefined;
-
 		window.addEventListener("keyup", function(e){
-
-			self.player1KeyIsDown = false;
-
-			if(
-				e.keyCode === self.controls.player1.up
-				|| e.keyCode === self.controls.player1.down
-				|| e.keyCode === self.controls.player2.up
-				|| e.keyCode === self.controls.player2.down
-			){
-				if(paddleMove) clearInterval(paddleMove);
-			}
+			self.keyDown = false;
 		});
 
 		window.addEventListener("keydown", function(e){
+			self.keyDown = true;
+			self.keyCode = e.keyCode;
 
-			//self.player1KeyIsDown = true;
-			
-			switch(e.keyCode){
-				case self.controls.start:
+			if(e.keyCode == self.controls.start){
+				if(self.gameWon) {
+					// if the game has been won, reset game state
+					self.resetGame();
 					self.tick();
-				break;
-				case self.controls.player1.up:
-
-					var paddle = self.player1Paddle;
-
-					var paddleTop = paddle.offsetTop,
-						paddleBottom =  paddleTop + self.config.paddleHeight;
-
-					if( paddleTop - 1 > 0){
-						self.player1Paddle.style.top = paddleTop - 25 + "px";
-					}
-
-				break;
-
-				case self.controls.player1.down:
-					var paddle = self.player1Paddle,
-						paddleTop = paddle.offsetTop,
-						paddleBottom = paddle.offsetTop + self.config.paddleHeight;
-
-					if( paddleBottom + 1 < self.getBoundingBox(window).y){
-						self.player1Paddle.style.top = paddleTop + 25 + "px";
-					}
-				break;
-
-				case self.controls.player2.up:
-					var paddle = self.player2Paddle,
-						paddleTop = paddle.offsetTop,
-						paddleBottom = paddle.offsetTop + self.config.paddleHeight;
-
-					if( paddleBottom + 1 < self.getBoundingBox(window).y){
-						self.player2Paddle.style.top = paddleTop - 25 + "px";
-					}
-				break;
-				
-				case self.controls.player2.down:
-					var paddle = self.player2Paddle,
-						paddleTop = paddle.offsetTop,
-						paddleBottom = paddle.offsetTop + self.config.paddleHeight;
-
-					if( paddleBottom + 1 < self.getBoundingBox(window).y){
-						self.player2Paddle.style.top = paddleTop + 25 + "px";
-					}
-				break;	
+				} else {
+					// run game if it isn't already
+					if(!self.gameRunning) self.tick();
+				}
 			}
 		});
-
 	}	
 
 
@@ -131,6 +77,7 @@ var Pong = function(){
 		this.ball.style.backgroundColor = "#fff";
 		this.ball.style.top = self.getBoundingBox(window).y / 2 + "px",
 		this.ball.style.left = (self.getBoundingBox(window).x / 2) - (width / 2) + "px";
+		this.ball.style.display = "none";
 
 		document.body.appendChild(this.ball);
 	}
@@ -159,11 +106,90 @@ var Pong = function(){
 
 	this.addPoint = function(player){
 		self.points[player] += 1;
-		document.querySelector("#"+player).innerHTML = self.points[player];
+		if(player === "player1"){
+			self.player1PointsDisplay.innerHTML = self.points[player];
+		} else if(player === "player2") {
+			self.player2PointsDisplay.innerHTML = self.points[player];
+		}
+
+		if(self.points[player] == 1 ) self.finishGame(player);
+	}
+
+	this.finishGame = function(player){
+		self.gameWon = true;
+
+		var winBanner = document.querySelector("#win-"+player);
+		winBanner.className += " reveal";
+	}
+
+	this.resetGame = function(){
+		self.points.player1 = 0;
+		self.points.player2 = 0;
+		self.directionX = "right";
+		self.directionY = undefined;
+		self.gameWon = false;
+
+		var winDisplays = document.querySelectorAll(".win-display");
+		for(var i=0, l=winDisplays.length; i<l; i++){
+			winDisplays[i].className = winDisplays[i].className.replace("reveal","");
+		}
 	}
 
 	this.tick = function (speed){
 		var tick = setInterval( function(){
+
+			self.gameRunning = true;
+
+			self.ball.style.display = "block";
+
+			if(self.keyDown){
+
+				switch(self.keyCode){
+
+					case self.controls.player1.up:
+
+						var paddle = self.player1Paddle;
+
+						var paddleTop = paddle.offsetTop,
+							paddleBottom =  paddleTop + self.config.paddleHeight;
+
+						if( paddleTop - 1 > 0){
+							self.player1Paddle.style.top = paddleTop - 3 + "px";
+						}
+
+					break;
+
+					case self.controls.player1.down:
+						var paddle = self.player1Paddle,
+							paddleTop = paddle.offsetTop,
+							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+
+						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+							self.player1Paddle.style.top = paddleTop + 3 + "px";
+						}
+					break;
+
+					case self.controls.player2.up:
+						var paddle = self.player2Paddle,
+							paddleTop = paddle.offsetTop,
+							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+
+						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+							self.player2Paddle.style.top = paddleTop - 3 + "px";
+						}
+					break;
+					
+					case self.controls.player2.down:
+						var paddle = self.player2Paddle,
+							paddleTop = paddle.offsetTop,
+							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+
+						if( paddleBottom + 1 < self.getBoundingBox(window).y){
+							self.player2Paddle.style.top = paddleTop + 3 + "px";
+						}
+					break;	
+				}
+			}
 
 			var currentX = !self.ball.style.left ? 0 : parseInt(self.ball.style.left),
 				currentY = !self.ball.style.top ? 0 : parseInt(self.ball.style.top),
@@ -235,9 +261,20 @@ var Pong = function(){
 		},1);
 
 		function resetTick(){
+			// stop the tick
 			clearInterval(tick);
+			self.gameRunning = false;
+
+			// reset ball position
 			self.ball.style.left = self.getBoundingBox(window).x / 2 + "px";
 			self.ball.style.top = self.getBoundingBox(window).y / 2 + "px";
+			self.ball.style.display = "none";
+
+			// reset paddle positions
+			self.player1Paddle.style.top = self.getBoundingBox(window).y / 2 - parseInt(self.player1Paddle.style.height) / 2 + "px";
+			self.player2Paddle.style.top = self.getBoundingBox(window).y / 2 - parseInt(self.player1Paddle.style.height) / 2 + "px";
+
+			// reset Y direction so that ball moves horizontally until deflected by a paddle (necessary?)
 			self.directionY = undefined;
 		}
 	};
