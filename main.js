@@ -1,3 +1,5 @@
+
+
 var Pong = function(){
 
 	var self = this;
@@ -47,6 +49,8 @@ var Pong = function(){
 	this.directionX = "right";
 	this.directionY = undefined; // which direction the ball is moving on the Y axis - "up" or "down"
 	this.ballYVector = 3; // how many pixels the ball should move up or down on each tick for diagonal movement
+
+	this.socket = socket;
 
 	this.bindControls = function(){
 
@@ -162,6 +166,7 @@ var Pong = function(){
 		self.config.infoDisplay["player2"].innerHTML = "";
 
 		self.tick();
+		self.socket.emit("go");
 	}
 
 	this.tick = function (speed){
