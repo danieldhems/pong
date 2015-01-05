@@ -3,7 +3,8 @@ var Pong = function(){
 	var self = this;
 
 	this.controls = {
-		start: 32, // spacebar
+		start: 32, // spacebar,
+		help: 104,
 		player1: {
 			"up": 81, // "Q"
 			"down": 65 // "A"
@@ -34,7 +35,8 @@ var Pong = function(){
 			player1: document.querySelector("#player1-points"),
 			player2: document.querySelector("#player2-points")		
 		},
-		startPlayMessage: "Press space to play",
+		helpMessage: document.querySelector("#help"),
+		startPlayMessage: "Press space to play<br><br>Press H for help",
 		winMessage: "Win"
 	};
 
@@ -62,10 +64,19 @@ var Pong = function(){
 					self.resetGame();
 				} else {
 					// run game if it isn't already
-					if(!self.gameRunning) self.tick();
+					if(!self.gameRunning) {
+						self.tick();
+					}
 				}
 			}
+
 		});
+
+		window.addEventListener("keypress", function(e){
+			if(e.keyCode == self.controls.help){
+				self.toggleHelp();
+			}
+		})
 	}	
 
 	this.makeBall = function (width, height){
@@ -113,6 +124,15 @@ var Pong = function(){
 	this.clearMessages = function(){
 		self.config.infoDisplay.player1.innerHTML = "";
 		self.config.infoDisplay.player2.innerHTML = "";
+	}
+
+	this.toggleHelp = function(){
+		var helpDisplay = self.config.helpMessage;
+		if(helpDisplay.className.indexOf("reveal") > -1){
+			helpDisplay.className = self.config.helpMessage.className.replace(" reveal","");
+		} else {
+		 	helpDisplay.className = helpDisplay.className + " reveal";
+		}
 	}
 
 	this.addPoint = function(player){
@@ -374,5 +394,4 @@ window.onload = function(){
 	var pong = new Pong();
 
 	var goButton = document.querySelector("#js-start");
-
 }

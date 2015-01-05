@@ -17,7 +17,7 @@
 		height:25%;
 		position:absolute;
 		top:50%;
-		font-size:4em;
+		font-size:3em;
 	}
 
 	#player1-info {
@@ -25,6 +25,16 @@
 	}
 	#player2-info {		
 		right:0;
+	}
+
+	#help {
+		display:none;
+		position:absolute;
+		top:0;
+		left:0;
+	}
+	#help.reveal {
+		display:block;
 	}
 
 	html,body {
@@ -49,6 +59,15 @@
 	</style>
 </head>
 <body>
+	<div id="help">
+		Player 1 controls<br>
+		"Q" = Up<br>
+		"A" = Down<br>
+		<br>
+		Player 2 controls<br>
+		Up arrow = Up<br>
+		Down arrow = Down<br>
+	</div>
 	<div id="scores">
 		<span id="player1-points">0</span>
 		<span id="player2-points">0</span>
