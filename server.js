@@ -16,6 +16,8 @@ var io = io(server);
 
 var clients = [];
 
+/*
+
 io.on("connect", function(socket){
 	console.log(socket.id + " connected");
 
@@ -48,5 +50,7 @@ console.log(clients[1]);
 io.on("ready", function(data){
 	
 });
+
+*/
 
 server.listen(3000)

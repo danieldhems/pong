@@ -17,6 +17,12 @@ var Pong = function(){
 		}
 	};
 
+	this.sounds = {
+		player1Paddle: new Audio("boop.mp3"),
+		player2Paddle: new Audio("beep.mp3"),
+		miss: new Audio("miss.mp3")
+	}
+
 	this.points = {
 		player1: 0,
 		player2: 0
@@ -266,6 +272,8 @@ var Pong = function(){
 				self.directionY = directionY;
 
 				self.directionX = "left";
+
+				self.sounds.player2Paddle.play();
 			}
 
 			if(self.isPaddleCollision(self.player1Paddle)){
@@ -277,6 +285,8 @@ var Pong = function(){
 				self.directionY = directionY;
 
 				self.directionX = "right";
+
+				self.sounds.player1Paddle.play();
 			}
 		
 			// roof and floor collision
@@ -286,10 +296,12 @@ var Pong = function(){
 			// point scoring when ball missed by paddles
 			if(currentX > windowRight) {
 				self.addPoint("player1");
+				self.sounds.miss.play();
 				resetTick();
 			}
 			if(currentX < windowLeft){
 				self.addPoint("player2");
+				self.sounds.miss.play();
 				resetTick();
 			}
 		},1);
