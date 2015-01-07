@@ -34,7 +34,7 @@ var Pong = function(){
 	this.config = {
 		paddleHeight: undefined,
 		scoreToWin: 5,
-		ballSpeed: 5,
+		ballSpeed: 2, // default
 		infoDisplay: {	
 			player1: document.querySelector("#player1-info"),
 			player2: document.querySelector("#player2-info")
@@ -55,6 +55,9 @@ var Pong = function(){
 	this.directionX = "right";
 	this.directionY = undefined; // which direction the ball is moving on the Y axis - "up" or "down"
 	this.ballYVector = 3; // how many pixels the ball should move up or down on each tick for diagonal movement
+
+	// counter for rally length
+	this.numPaddleCollisions = 0;
 
 	this.socket = socket;
 
@@ -175,6 +178,26 @@ var Pong = function(){
 		self.socket.emit("go");
 	}
 
+	this.setDifficulty = function(difficulty){
+		switch(difficulty){
+			case "easy":
+			self.config.ballSpeed = 2;
+			break;
+			
+			case "normal":
+			self.config.ballSpeed = 4;
+			break;
+			
+			case "hard":
+			self.config.ballSpeed = 6;
+			break;
+
+			case "elite":
+			self.config.ballSpeed = 8;
+			break;
+		}
+	}
+
 	this.tick = function (speed){
 		var tick = setInterval( function(){
 
@@ -274,6 +297,12 @@ var Pong = function(){
 				self.directionX = "left";
 
 				self.sounds.player2Paddle.play();
+
+				self.numPaddleCollisions ++;
+console.log(self.numPaddleCollisions);
+				if(self.numPaddleCollisions === 4) self.setDifficulty("normal");
+				if(self.numPaddleCollisions === 8) self.setDifficulty("hard");
+				if(self.numPaddleCollisions === 12) self.setDifficulty("elite");
 			}
 
 			if(self.isPaddleCollision(self.player1Paddle)){
@@ -287,6 +316,11 @@ var Pong = function(){
 				self.directionX = "right";
 
 				self.sounds.player1Paddle.play();
+				self.numPaddleCollisions ++;
+console.log(self.numPaddleCollisions);
+				if(self.numPaddleCollisions === 4) self.setDifficulty("normal");
+				if(self.numPaddleCollisions === 8) self.setDifficulty("hard");
+				if(self.numPaddleCollisions === 12) self.setDifficulty("elite");
 			}
 		
 			// roof and floor collision
@@ -322,6 +356,9 @@ var Pong = function(){
 
 			// reset Y direction so that ball moves horizontally until deflected by a paddle (necessary?)
 			self.directionY = undefined;
+
+			self.setDifficulty("easy");
+			self.numPaddleCollisions = 0;
 		}
 	};
 
