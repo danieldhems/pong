@@ -50,6 +50,8 @@ var Pong = function(){
 
 	this.keyDown = false;
 
+	this.keysDown = [];
+
 	this.gameWon = false;
 
 	this.directionX = "right";
@@ -64,7 +66,7 @@ var Pong = function(){
 	this.bindControls = function(){
 
 		window.addEventListener("keyup", function(e){
-			self.keyDown = false;
+			self.removeKeyDown(e.keyCode);
 		});
 
 		window.addEventListener("keydown", function(e){
@@ -83,6 +85,8 @@ var Pong = function(){
 				}
 			}
 
+			self.addKeyDown(e.keyCode);
+				
 		});
 
 		window.addEventListener("keypress", function(e){
@@ -91,6 +95,21 @@ var Pong = function(){
 			}
 		})
 	}	
+
+	// helper method adds unique keys to array on keydown
+	this.addKeyDown = function(key){
+		for (var i in self.keysDown) {
+			if(key === self.keysDown[i]) return false;
+		}
+		self.keysDown.push(key);
+	}
+	this.removeKeyDown = function(key){
+		for (var i in self.keysDown) {
+			if(key === self.keysDown[i]){
+				delete self.keysDown[i];
+			}
+		}
+	}
 
 	this.makeBall = function (width, height){
 		this.ball = document.createElement("div");
@@ -207,50 +226,53 @@ var Pong = function(){
 
 			if(self.keyDown){
 
-				switch(self.keyCode){
+				for(var key in self.keysDown){
 
-					case self.controls.player1.up:
+					switch(self.keysDown[key]){
 
-						var paddle = self.player1Paddle;
+						case self.controls.player1.up:
 
-						var paddleTop = paddle.offsetTop,
-							paddleBottom =  paddleTop + self.config.paddleHeight;
+							var paddle = self.player1Paddle;
 
-						if( paddleTop - 3 >= 0){
-							self.player1Paddle.style.top = paddleTop - 3 + "px";
-						}
+							var paddleTop = paddle.offsetTop,
+								paddleBottom =  paddleTop + self.config.paddleHeight;
 
-					break;
+							if( paddleTop - 3 >= 0){
+								self.player1Paddle.style.top = paddleTop - 3 + "px";
+							}
 
-					case self.controls.player1.down:
-						var paddle = self.player1Paddle,
-							paddleTop = paddle.offsetTop,
-							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+						break;
 
-						if( paddleBottom + 3 <= self.getBoundingBox(window).y){
-							self.player1Paddle.style.top = paddleTop + 3 + "px";
-						}
-					break;
+						case self.controls.player1.down:
+							var paddle = self.player1Paddle,
+								paddleTop = paddle.offsetTop,
+								paddleBottom = paddle.offsetTop + self.config.paddleHeight;
 
-					case self.controls.player2.up:
-						var paddle = self.player2Paddle,
-							paddleTop = paddle.offsetTop,
-							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+							if( paddleBottom + 3 <= self.getBoundingBox(window).y){
+								self.player1Paddle.style.top = paddleTop + 3 + "px";
+							}
+						break;
 
-						if( paddleTop - 3 >= 0){
-							self.player2Paddle.style.top = paddleTop - 3 + "px";
-						}
-					break;
-					
-					case self.controls.player2.down:
-						var paddle = self.player2Paddle,
-							paddleTop = paddle.offsetTop,
-							paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+						case self.controls.player2.up:
+							var paddle = self.player2Paddle,
+								paddleTop = paddle.offsetTop,
+								paddleBottom = paddle.offsetTop + self.config.paddleHeight;
 
-						if( paddleBottom + 3 <= self.getBoundingBox(window).y){
-							self.player2Paddle.style.top = paddleTop + 3 + "px";
-						}
-					break;	
+							if( paddleTop - 3 >= 0){
+								self.player2Paddle.style.top = paddleTop - 3 + "px";
+							}
+						break;
+						
+						case self.controls.player2.down:
+							var paddle = self.player2Paddle,
+								paddleTop = paddle.offsetTop,
+								paddleBottom = paddle.offsetTop + self.config.paddleHeight;
+
+							if( paddleBottom + 3 <= self.getBoundingBox(window).y){
+								self.player2Paddle.style.top = paddleTop + 3 + "px";
+							}
+						break;	
+					}
 				}
 			}
 
@@ -273,7 +295,6 @@ var Pong = function(){
 			// horizontal movement
 			if(self.directionX == "right"){
 				self.ball.style.left = currentX + self.config.ballSpeed + "px";
-				//self.ball.style.top = currentY - (25/90) + "px";
 			} else if(self.directionX == "left") {
 				self.ball.style.left = currentX - self.config.ballSpeed + "px";
 			}
@@ -299,7 +320,7 @@ var Pong = function(){
 				self.sounds.player2Paddle.play();
 
 				self.numPaddleCollisions ++;
-console.log(self.numPaddleCollisions);
+
 				if(self.numPaddleCollisions === 4) self.setDifficulty("normal");
 				if(self.numPaddleCollisions === 8) self.setDifficulty("hard");
 				if(self.numPaddleCollisions === 12) self.setDifficulty("elite");
@@ -317,7 +338,7 @@ console.log(self.numPaddleCollisions);
 
 				self.sounds.player1Paddle.play();
 				self.numPaddleCollisions ++;
-console.log(self.numPaddleCollisions);
+
 				if(self.numPaddleCollisions === 4) self.setDifficulty("normal");
 				if(self.numPaddleCollisions === 8) self.setDifficulty("hard");
 				if(self.numPaddleCollisions === 12) self.setDifficulty("elite");
