@@ -1,5 +1,3 @@
-
-
 var Pong = function(){
 
 	var self = this;
@@ -18,9 +16,9 @@ var Pong = function(){
 	};
 
 	this.sounds = {
-		player1Paddle: new Audio("boop.mp3"),
-		player2Paddle: new Audio("beep.mp3"),
-		miss: new Audio("miss.mp3")
+		player1Paddle: new Audio("./boop.mp3"),
+		player2Paddle: new Audio("./beep.mp3"),
+		miss: new Audio("./miss.mp3")
 	}
 
 	this.points = {
@@ -60,8 +58,6 @@ var Pong = function(){
 
 	// counter for rally length
 	this.numPaddleCollisions = 0;
-
-	this.socket = socket;
 
 	this.bindControls = function(){
 
