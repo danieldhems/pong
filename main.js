@@ -4,6 +4,37 @@ var Pong = function(){
 
 	var self = this;
 
+	this.gameData = this.gameData || {};
+
+	/**
+	*
+	*	Sockets
+	*
+	*/
+
+	var socket = io("http://localhost:3000");
+
+	socket.on('connect', function(){
+		console.log('connected to localhost');
+	});
+
+	socket.on("waiting", function(data){
+		console.log('waiting for game');
+	});
+
+	socket.on("gameReady", function(data){
+		console.log('game ready');
+		gameData = data;
+		console.log(gameData);
+	});
+
+	socket.on('gameStart', function(data){
+		console.log('game started');
+		if(!self.gameRunning) self.tick();
+
+	});
+
+
 	this.controls = {
 		start: 32, // spacebar,
 		help: 104,
@@ -61,8 +92,6 @@ var Pong = function(){
 	// counter for rally length
 	this.numPaddleCollisions = 0;
 
-	this.socket = socket;
-
 	this.bindControls = function(){
 
 		window.addEventListener("keyup", function(e){
@@ -72,6 +101,7 @@ var Pong = function(){
 		window.addEventListener("keydown", function(e){
 			self.keyDown = true;
 			self.keyCode = e.keyCode;
+					// console.log(self.gameData);
 
 			if(e.keyCode == self.controls.start){
 				if(self.gameWon) {
@@ -79,8 +109,11 @@ var Pong = function(){
 					self.resetGame();
 				} else {
 					// run game if it isn't already
+
+
 					if(!self.gameRunning) {
 						self.tick();
+						socket.emit('gameStart', {gameId: gameData.gameId});
 					}
 				}
 			}
@@ -462,6 +495,7 @@ var Pong = function(){
 
 	this.init();
 
+	
 }
 
 window.onload = function(){

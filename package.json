@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/danieldhems/pong",
   "dependencies": {
+    "crypto": "0.0.3",
     "express": "^4.10.7",
     "socket.io": "^1.2.1"
   }

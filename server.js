@@ -1,6 +1,7 @@
 var http = require("http"),
 	express = require("express"),
-	io = require("socket.io");
+	io = require("socket.io"),
+	crypto = require('crypto');
 
 var app = express();
 
@@ -15,38 +16,47 @@ app.get("/", function(req, res){
 var io = io(server);
 
 var clients = [];
+var games = [];
 
 io.on("connect", function(socket){
 	console.log(socket.id + " connected");
 
-	var client = socket;
-
 	clients.push(socket);
-console.log(clients[0]);
-console.log(clients[1]);
+
 	// when clients obj has 3 keys, first one being the server itself, send ready message
 	if(clients.length == 2) {
 
 		var game = {
-			player1: clients[0],
-			player2: clients[1]
-		}
+			id: crypto.randomBytes(20).toString('hex'),
+			player1: clients[0].id,
+			player2: clients[1].id
+		};
 
-		io.to(game.player1.id).emit("ready", { isHost: true } );
-		io.to(game.player2.id).emit("ready", { isHost: false } );
 
-	} else {
+		io.to(game.player1).emit("gameReady", {
+			gameId: game.id,
+			playerId: game.player1,
+			isHost: true
+		});
 
-		client.emit("waiting", {
-			id: clients[socket.id].id,
-			message: "waiting for other player" 
-		})
+		io.to(game.player2).emit("gameReady", {
+			gameId: game.id,
+			playerId: game.player2,
+			isHost: false
+		});
+
+		games.push(game);
+
+		console.log(games);
+		
+		clients = [];
 
 	}
-});
 
-io.on("ready", function(data){
-	
+	io.on('gameStart', function(data){
+		console.log('gameStart '+data);
+		io.broadcast.to(data.gameId).emit('gameStart', {});
+	});
 });
 
 server.listen(3000)
