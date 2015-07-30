@@ -18,7 +18,7 @@ var io = io(server);
 var clients = [];
 var games = [];
 
-io.on("connect", function(socket){
+io.on("connection", function(socket){
 	console.log(socket.id + " connected");
 
 	clients.push(socket);
@@ -51,11 +51,13 @@ io.on("connect", function(socket){
 		
 		clients = [];
 
+	} else {
+		io.to(socket.id).emit('waiting');
 	}
 
-	io.on('gameStart', function(data){
+	socket.on('gameStart', function(data){
 		console.log('gameStart '+data);
-		io.broadcast.to(data.gameId).emit('gameStart', {});
+		socket.broadcast.emit('gameStart', {});
 	});
 });
 

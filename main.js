@@ -4,7 +4,7 @@ var Pong = function(){
 
 	var self = this;
 
-	this.gameData = this.gameData || {};
+	self.gameData = self.gameData || {};
 
 	/**
 	*
@@ -12,7 +12,7 @@ var Pong = function(){
 	*
 	*/
 
-	var socket = io("http://localhost:3000");
+	var socket = io.connect("http://localhost:3000");
 
 	socket.on('connect', function(){
 		console.log('connected to localhost');
@@ -24,14 +24,16 @@ var Pong = function(){
 
 	socket.on("gameReady", function(data){
 		console.log('game ready');
-		gameData = data;
-		console.log(gameData);
+		self.gameData = data;
 	});
 
 	socket.on('gameStart', function(data){
 		console.log('game started');
 		if(!self.gameRunning) self.tick();
-
+	});
+	socket.on('playerMove', function(data){
+		console.log('player move');
+		if(!self.gameRunning) self.addKeyDown(self.gameData.isHost ? self.controls.player2.up : self.controls.player2.down);
 	});
 
 
@@ -108,17 +110,17 @@ var Pong = function(){
 					// if the game has been won, reset game state
 					self.resetGame();
 				} else {
+
 					// run game if it isn't already
-
-
-					if(!self.gameRunning) {
+					if(self.gameData.isHost && !self.gameRunning) {
 						self.tick();
-						socket.emit('gameStart', {gameId: gameData.gameId});
+						socket.emit('gameStart', {gameId: self.gameData.gameId});
 					}
 				}
 			}
 
 			self.addKeyDown(e.keyCode);
+			socket.emit('playerMove');
 				
 		});
 
@@ -251,6 +253,9 @@ var Pong = function(){
 	}
 
 	this.tick = function (speed){
+
+		socket.emit('gameStart');
+
 		var tick = setInterval( function(){
 
 			self.gameRunning = true;
@@ -495,7 +500,6 @@ var Pong = function(){
 
 	this.init();
 
-	
 }
 
 window.onload = function(){
